@@ -9,10 +9,10 @@ export default function Navbar() {
 
   const navItems = [
     { label: "Home", path: "/" },
-    { label: "Awareness", path: "/awareness" },
+    { label: "Features", path: "/features" },
     { label: "How-To", path: "/how-to" },
     { label: "Help", path: "/help" },
-    { label: "Chatbot", path: "/chatbot" },
+    { label: "Chatbot", path: "/chat" },
   ];
 
   return (
@@ -119,12 +119,12 @@ export default function Navbar() {
             </button>
 
             {/* Mobile Menu Button */}
-            <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden p-2"
+            >
               {isOpen ? (
-                <X
-                  style={{ color: "var(--foreground)" }}
-                  className="w-6 h-6"
-                />
+                <X style={{ color: "var(--foreground)" }} className="w-6 h-6" />
               ) : (
                 <Menu
                   style={{ color: "var(--foreground)" }}

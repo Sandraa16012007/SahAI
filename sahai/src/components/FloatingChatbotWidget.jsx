@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
@@ -13,28 +13,33 @@ export function FloatingChatbotWidget() {
     },
   ]);
   const [input, setInput] = useState("");
+  const messagesEndRef = useRef(null);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSend = () => {
-    if (input.trim()) {
-      const newMessage = {
-        id: Date.now().toString(),
-        text: input,
-        sender: "user",
+    if (!input.trim()) return;
+
+    const newMessage = {
+      id: Date.now().toString(),
+      text: input,
+      sender: "user",
+    };
+    setMessages([...messages, newMessage]);
+    setInput("");
+
+    // Simulate bot response
+    setTimeout(() => {
+      const botResponse = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm here to help! You can ask me about government schemes, benefits, and application procedures. How can I assist you?",
+        sender: "bot",
       };
-      setMessages([...messages, newMessage]);
-
-      // Simulate bot response
-      setTimeout(() => {
-        const botResponse = {
-          id: (Date.now() + 1).toString(),
-          text: "I'm here to help! You can ask me about government schemes, benefits, and application procedures. How can I assist you?",
-          sender: "bot",
-        };
-        setMessages((prev) => [...prev, botResponse]);
-      }, 500);
-
-      setInput("");
-    }
+      setMessages((prev) => [...prev, botResponse]);
+    }, 500);
   };
 
   return (
@@ -43,112 +48,75 @@ export function FloatingChatbotWidget() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open chatbot"
-        style={{
-          backgroundColor: "var(--primary)",
-          color: "var(--primary-foreground)",
-          borderRadius: "9999px",
-          padding: "1rem",
-          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-          transition: "all 0.2s",
-          position: "fixed",
-          bottom: "1.5rem",
-          right: "1.5rem",
-          zIndex: 40,
-        }}
+        className="fixed bottom-6 right-6 z-50 rounded-full p-4 shadow-lg transition-all duration-200
+                   bg-primary text-primary-foreground hover:scale-105 dark:bg-primary-light dark:text-primary-foreground"
       >
-        {isOpen ? <X style={{ width: "1.5rem", height: "1.5rem" }} /> : <MessageCircle style={{ width: "1.5rem", height: "1.5rem" }} />}
+        {isOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <MessageCircle className="w-6 h-6" />
+        )}
       </button>
 
       {/* Chat Widget */}
       {isOpen && (
         <div
-          style={{
-            position: "fixed",
-            bottom: "6rem",
-            right: "1.5rem",
-            width: "24rem",
-            maxWidth: "calc(100vw - 2rem)",
-            height: "24rem",
-            backgroundColor: "var(--card)",
-            border: "1px solid var(--border)",
-            borderRadius: "1rem",
-            boxShadow: "0 10px 15px rgba(0,0,0,0.1)",
-            display: "flex",
-            flexDirection: "column",
-            zIndex: 40,
-          }}
+          className="fixed bottom-24 right-6 w-96 max-w-full h-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                        rounded-xl shadow-xl flex flex-col z-50 transition-colors duration-300"
         >
           {/* Header */}
           <div
-            style={{
-              background: `linear-gradient(135deg, var(--primary) 0%, var(--primary-foreground)/0.8 100%)`,
-              color: "var(--primary-foreground)",
-              padding: "1rem",
-              borderTopLeftRadius: "1rem",
-              borderTopRightRadius: "1rem",
-            }}
+            className="px-4 py-3 rounded-t-xl bg-gradient-to-r from-primary to-secondary dark:from-primary-light dark:to-secondary-light
+                          text-primary-foreground dark:text-gray-100"
           >
-            <h3 style={{ fontWeight: 700, fontSize: "1.125rem" }}>SahAI Assistant</h3>
-            <p style={{ fontSize: "0.875rem", opacity: 0.9 }}>
+            <h3 className="font-bold text-lg">SahAI Assistant</h3>
+            <p className="text-sm opacity-90">
               Ask me anything about government benefits
             </p>
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3">
             {messages.map((message) => (
               <div
                 key={message.id}
-                style={{ display: "flex", justifyContent: message.sender === "user" ? "flex-end" : "flex-start" }}
+                className={`flex ${
+                  message.sender === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
-                  style={{
-                    maxWidth: "16rem",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "0.5rem",
-                    borderBottomRightRadius: message.sender === "user" ? "0" : "0.5rem",
-                    borderBottomLeftRadius: message.sender === "user" ? "0.5rem" : "0",
-                    backgroundColor: message.sender === "user" ? "var(--primary)" : "var(--muted)",
-                    color: message.sender === "user" ? "var(--primary-foreground)" : "var(--foreground)",
-                  }}
+                  className={`max-w-[16rem] p-2.5 rounded-lg 
+                              ${
+                                message.sender === "user"
+                                  ? "bg-primary text-primary-foreground rounded-br-none"
+                                  : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
+                              }`}
                 >
-                  <p style={{ fontSize: "0.875rem", margin: 0 }}>{message.text}</p>
+                  <p className="text-sm">{message.text}</p>
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
-          <div style={{ borderTop: "1px solid var(--border)", padding: "1rem", display: "flex", gap: "0.5rem" }}>
+          <div className="flex p-3 gap-2 border-t border-gray-200 dark:border-gray-700">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => { if (e.key === "Enter") handleSend(); }}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Type your question..."
-              style={{
-                flex: 1,
-                backgroundColor: "var(--input)",
-                border: "1px solid var(--border)",
-                borderRadius: "0.5rem",
-                padding: "0.5rem",
-                fontSize: "0.875rem",
-                outline: "none",
-                boxShadow: "inset 0 0 0 1px var(--border)",
-              }}
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700
+                         text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
             />
             <button
               onClick={handleSend}
               aria-label="Send message"
-              style={{
-                backgroundColor: "var(--primary)",
-                color: "var(--primary-foreground)",
-                padding: "0.5rem",
-                borderRadius: "0.5rem",
-                transition: "background 0.2s",
-              }}
+              className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary
+                         transition-colors"
             >
-              <Send style={{ width: "1.25rem", height: "1.25rem" }} />
+              <Send className="w-5 h-5" />
             </button>
           </div>
         </div>

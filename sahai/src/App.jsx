@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Chat from "./pages/Chat";
+import Features from "./pages/Features";
 import Navbar from "./components/Navbar";
 import ThemeProvider from "./components/ThemeProvider.jsx";
 import { FloatingChatbotWidget } from "./components/FloatingChatbotWidget";
@@ -14,9 +15,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/features" element={<Features />} />
         </Routes>
         <FloatingChatbotWidget />
-        <Footer/>
+        <Footer />
       </Router>
     </ThemeProvider>
   );
